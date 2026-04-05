@@ -1,47 +1,30 @@
-// Role-based access control middleware
+const allowRoles = (...roles) => {
+  return (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
 
-// Only Admin
-exports.isAdmin = (req, res, next) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ msg: "No user found (Unauthorized)" });
+      if (!roles.includes(req.user.role)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      next();
+    } catch (err) {
+      return res.status(500).json({ message: "Role middleware error" });
     }
-
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ msg: "Access denied (Admin only)" });
-    }
-
-    next();
-  } catch (err) {
-    res.status(500).json({ msg: "Error in isAdmin middleware" });
-  }
+  };
 };
 
-// Only Student
-exports.isStudent = (req, res, next) => {
+const isAuthenticated = (req, res, next) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ msg: "No user found (Unauthorized)" });
-    }
-
-    if (req.user.role !== "student") {
-      return res.status(403).json({ msg: "Access denied (Student only)" });
-    }
-
-    next();
-  } catch (err) {
-    res.status(500).json({ msg: "Error in isStudent middleware" });
-  }
-};
-
-//  Allowing both 
-exports.isAuthenticated = (req, res, next) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ msg: "Unauthorized" });
+      return res.status(401).json({ message: "Unauthorized" });
     }
     next();
   } catch (err) {
-    res.status(500).json({ msg: "Auth middleware error" });
+    return res.status(500).json({ message: "Auth middleware error" });
   }
 };
+
+module.exports = { allowRoles, isAuthenticated };

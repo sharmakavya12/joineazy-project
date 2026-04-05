@@ -1,204 +1,286 @@
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png";
-function Home() {
+import logo1 from "../assets/logo1.png";
+
+export default function Home() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
 
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = "/auth";
-  };
-
-  const scrollToFeatures = () => {
-    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const features = [
+    {
+      icon: "📋",
+      title: "Assignment Management",
+      desc: "Professors can create, edit, and track assignments with deadlines and OneDrive links.",
+    },
+    {
+      icon: "👥",
+      title: "Group Submissions",
+      desc: "Form groups, assign leaders, and acknowledge submissions on behalf of the whole team.",
+    },
+    {
+      icon: "📊",
+      title: "Progress Analytics",
+      desc: "Real-time submission tracking with progress bars and status badges for every assignment.",
+    },
+    {
+      icon: "🔐",
+      title: "Role-Based Access",
+      desc: "Separate dashboards for students and professors with JWT-secured authentication.",
+    },
+    {
+      icon: "🎓",
+      title: "Course Enrollment",
+      desc: "Students enroll in courses using a course code shared by their professor.",
+    },
+    {
+      icon: "✅",
+      title: "Submission Tracking",
+      desc: "Individual and group acknowledgment flows with visual confirmation feedback.",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-purple-50">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 lg:px-12 py-4 bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
-        <div className="flex items-center space-x-2">
-          {/* <div className="w-10 h-10 bg-linear-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-xl">S</span>
+    <div className="min-h-screen overflow-x-hidden bg-white text-gray-900">
+      {/* NAVBAR */}
+      <nav className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-green-100 bg-white/90 px-4 backdrop-blur-xl sm:px-6 lg:px-10 shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-[#1a6b4a] to-[#2da870]  ">
+            <img src={logo1} alt="Logo" className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            SGAMS
-          </h1> */}
-          <img src={logo} className="w-16 h-13 rounded-full" />
-          
+          <span className="text-lg font-medium tracking-tight text-gray-900">SGAMS</span>
         </div>
 
-        <div className="flex items-center space-x-4">
-          {token ? (
-            <button
-              onClick={handleLogout}
-              className="px-6 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-full shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-            >
-              Logout
-            </button>
-          ) : (
-            <button
-              onClick={() => navigate("/auth")}
-              className="px-8 py-3 text-sm rounded-full font-semibold text-white bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-            >
-              Get Started
-            </button>
-          )}
+        <div className="flex gap-3">
+          <button
+            onClick={() => navigate("/auth")}
+            className="rounded-full border border-green-300 bg-transparent px-5 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-700 hover:text-white"
+          >
+            Login
+          </button>
+          <button
+            onClick={() => navigate("/auth")}
+            className="rounded-full bg-linear-to-br from-[#1a6b4a] to-[#2da870] px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5"
+          >
+            Get Started
+          </button>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[calc(100vh-80px)] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img 
-             
-            alt="Hero" 
-            className="w-full h-full object-cover opacity-20 mix-blend-overlay"
-          />
-          <div className="absolute inset-0 bg-linear-to-r from-blue-600/20 via-purple-600/20 to-indigo-600/20"></div>
+      {/* HERO */}
+      <section className="relative flex flex-col items-center overflow-hidden bg-linear-to-br from-[#1a6b4a] via-[#1e8a5e] to-[#3dd68c] px-4 pb-24 pt-20 text-center sm:px-6 lg:px-10">
+        {/* Decorative wave bottom */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+            <path d="M0 40 C360 80 1080 0 1440 40 L1440 80 L0 80 Z" fill="white" />
+          </svg>
         </div>
-        
-        <div className=" z-10 text-center px-6 max-w-4xl my-auto mx-auto">
-          <h1 className="text-7xl lg:text-7xl font-black bg-linear-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-8 animate-fade-in-up">
-            Student Group &<br />Assignment Mastery
-          </h1>
-          <p className="text-xl lg:text-2xl text-gray-700 mb-8 max-w-2xl leading-relaxed opacity-90 ">
-            Streamline group projects, track assignments, and collaborate seamlessly. 
-            Built for students, groups, and admins.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <button
-              onClick={() => navigate("/auth")}
-              className="px-10 rounded-full py-4 text-lg font-semibold text-white bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-2xl transition-all duration-300 hover:shadow-3xl hover:-translate-y-2 hover:scale-105 transform-gpu"
-            >
-              Start Free Today
-            </button>
-            <button
-              onClick={scrollToFeatures}
-              className="px-10 py-4 text-lg font-semibold text-gray-800 bg-white/80 backdrop-blur-sm hover:bg-white border-2 border-gray-200 rounded-full shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-gray-300"
-            >
-              See Features
-            </button>
-          </div>
+
+        {/* Subtle radial overlays */}
+        <div className="pointer-events-none absolute right-[-5%] top-[20%] h-64 w-64 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute bottom-[15%] left-[-5%] h-48 w-48 rounded-full bg-white/5" />
+
+        <div className="relative mb-7 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
+          <span className="h-1.5 w-1.5 rounded-full bg-white" />
+          Student & Group Assignment Management System
         </div>
-      </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-24 px-6 lg:px-12">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl lg:text-5xl py-1 text-center bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4 max-w-2xl mx-auto">
-            Everything You Need
-          </h2>
-          <p className="text-xl text-gray-600 text-center max-w-2xl mx-auto mb-20 leading-relaxed my-12">
-            Powerful tools designed for modern student workflows.
-          </p>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-10 shadow-xl hover:shadow-2xl hover:-translate-y-4 transition-all duration-500 border border-white/50 hover:border-blue-100">
-              <div className="w-20 h-20 bg-linear-to-r from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-300 mx-auto">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl text-gray-900 mb-4 text-center group-hover:text-blue-600 transition-colors">
-                Group Management
-              </h3>
-              <p className="text-gray-600 text-center leading-relaxed">
-                Create and manage student groups effortlessly with real-time updates and role assignments.
-              </p>
-            </div>
+        <h1 className="relative mb-6 max-w-4xl text-4xl  leading-tight tracking-tight text-white sm:text-5xl lg:text-7xl">
+          Assignments,{" "}
+          <span className="rounded-xl bg-white/20 px-3 py-1 text-white">
+            simplified
+          </span>{" "}
+          for everyone
+        </h1>
 
-            {/* Feature 2 */}
-            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-10 shadow-xl hover:shadow-2xl hover:-translate-y-4 transition-all duration-500 border border-white/50 hover:border-purple-100 relative md:col-span-1">
-              <div className="w-20 h-20 bg-linear-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-300 mx-auto">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <h3 className="text-2xl text-gray-900 mb-4 text-center group-hover:text-purple-600 transition-colors">
-                Assignment Tracking
-              </h3>
-              <p className="text-gray-600 text-center leading-relaxed">
-                Track deadlines, submissions, and grades with automated notifications and progress analytics.
-              </p>
-            </div>
+        <p className="relative mb-10 max-w-2xl text-base leading-8 text-white/80 sm:text-lg">
+          A unified platform for professors to manage assignments and for students
+          to submit, track progress, and collaborate in groups — all in one place.
+        </p>
 
-            {/* Feature 3 */}
-            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-10 shadow-xl hover:shadow-2xl hover:-translate-y-4 transition-all duration-500 border border-white/50 hover:border-indigo-100">
-              <div className="w-20 h-20 bg-linear-to-r from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-300 mx-auto">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl text-gray-900 mb-4 text-center group-hover:text-indigo-600 transition-colors">
-                Smart Dashboards
-              </h3>
-              <p className="text-gray-600 text-center leading-relaxed">
-                Intuitive dashboards for students and admins with real-time insights and easy navigation.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-linear-to-r from-blue-600 to-purple-600 text-white">
-        <div className="text-center max-w-2xl mx-auto px-6">
-          <h2 className="text-4xl lg:text-3xl  mb-6">
-            Ready to Transform Your Workflow?
-          </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join thousands of students managing groups and assignments smarter.
-          </p>
+        <div className="relative flex flex-wrap justify-center gap-4">
           <button
             onClick={() => navigate("/auth")}
-            className="rounded-4xl px-12 py-5 text-xl font-bold text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 border-2 border-white/30 shadow-2xl transition-all duration-300 hover:shadow-3xl hover:scale-105"
+            className="flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-bold text-[#1a6b4a] shadow-lg transition hover:-translate-y-0.5"
           >
-            Get Started Free
+            Get Started Free <span>→</span>
           </button>
+          <button
+            onClick={() => navigate("/auth")}
+            className="rounded-full border border-white/30 bg-white/10 px-8 py-3.5 text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
+          >
+            Login to Dashboard
+          </button>
+        </div>
+
+        {/* Dashboard mockup */}
+        <div className="relative mt-16 w-full max-w-4xl rounded-3xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-sm">
+          <div className="mb-5 flex items-center gap-2">
+            <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
+            <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+            <div className="h-2.5 w-2.5 rounded-full bg-green-300" />
+            <div className="ml-2 h-6 flex-1 rounded-md bg-white/10" />
+          </div>
+
+          <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+            {[
+              { label: "Courses", val: "6", color: "text-white", bg: "bg-white/20" },
+              { label: "Assignments", val: "14", color: "text-white", bg: "bg-white/20" },
+              { label: "Submitted", val: "11", color: "text-green-200", bg: "bg-white/15" },
+              { label: "Pending", val: "3", color: "text-amber-200", bg: "bg-white/15" },
+            ].map((s, i) => (
+              <div key={i} className={`rounded-2xl ${s.bg} p-4`}>
+                <div className={`text-2xl font-extrabold ${s.color}`}>{s.val}</div>
+                <div className="mt-1 text-xs text-white/60">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {[
+              { title: "Data Structures Lab", type: "Individual", status: "Submitted", pct: 100, statusColor: "text-green-200", statusBg: "bg-green-500/30", bar: "from-green-300 to-green-200" },
+              { title: "OS Assignment 3", type: "Group", status: "Pending", pct: 40, statusColor: "text-amber-200", statusBg: "bg-amber-500/30", bar: "from-white/60 to-white/40" },
+            ].map((a, i) => (
+              <div key={i} className="rounded-2xl bg-white/10 p-4">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="flex-1 text-sm font-bold text-white">{a.title}</div>
+                  <span className={`rounded-md px-2 py-1 text-[10px] font-bold ${a.statusBg} ${a.statusColor}`}>
+                    {a.status}
+                  </span>
+                </div>
+                <div className="mb-3 text-xs text-white/50">
+                  {a.type === "Group" ? "👥" : "👤"} {a.type}
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
+                  <div className={`h-full bg-linear-to-r ${a.bar} rounded-full`} style={{ width: `${a.pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-linear-to-t from-slate-900 to-gray-800 text-white py-12 px-6">
-        <div className="max-w-6xl mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-4 bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            SGAMS
-          </h3>
-          <p className="text-gray-400 mb-6 max-w-md mx-auto">
-            Streamlining student group and assignment management.
-          </p>
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400 mb-8">
-            <a href="/" className="hover:text-white transition-colors">Home</a>
-            <a href="/auth" className="hover:text-white transition-colors">Login</a>
-            <a href="#" className="hover:text-white transition-colors">Features</a>
-            <a href="#" className="hover:text-white transition-colors">About</a>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
+      {/* FEATURES */}
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-10">
+        <div className="mb-14 text-center">
+          <div className="mb-4 inline-block rounded-full border border-green-200 bg-green-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-green-700">
+            Features
           </div>
-          <div className="border-t border-gray-700 pt-6 text-xs text-gray-500">
-            © 2024 SGAMS. All rights reserved.
+          <h2 className="mb-4 text-3xl font-medium tracking-tight text-gray-900 sm:text-4xl">
+            Everything you need, nothing you don't
+          </h2>
+          <p className="mx-auto max-w-xl text-base text-gray-500">
+            Built for academic workflows — clean, fast, and intuitive for both students and professors.
+          </p>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {features.map((f, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-green-100 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-green-300 hover:shadow-md"
+            >
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-green-100 bg-linear-to-br from-[#e8f8f0] to-[#c6eedd] text-2xl">
+                {f.icon}
+              </div>
+              <h3 className="mb-2 text-base font-bold text-gray-900">{f.title}</h3>
+              <p className="text-sm leading-6 text-gray-500">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ROLES */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-10">
+        <div className="grid gap-6 lg:grid-cols-2">
+          {[
+            {
+              role: "For Students",
+              icon: "🎓",
+              gradient: "from-[#1a6b4a] to-[#2da870]",
+              light: "bg-green-50 border-green-100",
+              checkBg: "bg-green-100",
+              checkColor: "text-green-700",
+              points: [
+                "View all enrolled courses and assignments",
+                "Submit individual assignments with one click",
+                "Form groups and let leaders acknowledge submissions",
+                "Track your progress with real-time status badges",
+              ],
+            },
+            {
+              role: "For Professors",
+              icon: "👨‍🏫",
+              gradient: "from-[#0e7490] to-[#22d3ee]",
+              light: "bg-teal-50 border-teal-100",
+              checkBg: "bg-teal-100",
+              checkColor: "text-teal-700",
+              points: [
+                "Create and manage courses with unique codes",
+                "Create assignments with deadlines and OneDrive links",
+                "Monitor submission rates with progress analytics",
+                "View individual and group submission statuses",
+              ],
+            },
+          ].map((r, i) => (
+            <div key={i} className={`rounded-3xl border p-8 ${r.light}`}>
+              <div className="mb-6 flex items-center gap-3">
+                <div className={`flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br ${r.gradient} text-2xl shadow-sm`}>
+                  {r.icon}
+                </div>
+                <h3 className="text-2xl font-extrabold text-gray-900">{r.role}</h3>
+              </div>
+              <div className="flex flex-col gap-3">
+                {r.points.map((p, j) => (
+                  <div key={j} className="flex items-start gap-3">
+                    <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${r.checkBg} ${r.checkColor}`}>
+                      ✓
+                    </div>
+                    <span className="text-sm leading-6 text-gray-600">{p}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="px-4 py-20 sm:px-6 lg:px-10">
+        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl bg-linear-to-br from-[#1a6b4a] to-[#3dd68c] px-6 py-14 text-center shadow-xl sm:px-10">
+          <div className="pointer-events-none absolute left-1/2 top-0 h-48 w-64 -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
+          <h2 className="relative mb-4 text-3xl font-medium tracking-tight text-white sm:text-4xl">
+            Ready to get started?
+          </h2>
+          <p className="relative mb-9 text-base text-white/75">
+            Join SGAMS today and take control of your academic assignments.
+          </p>
+          <div className="relative flex flex-wrap justify-center gap-4">
+            <button
+              onClick={() => navigate("/auth")}
+              className="rounded-2xl bg-white px-9 py-3.5 text-base font-bold text-[#1a6b4a] shadow-lg transition hover:-translate-y-0.5"
+            >
+              Create Account →
+            </button>
+            <button
+              onClick={() => navigate("/auth")}
+              className="rounded-2xl border border-white/30 bg-white/15 px-9 py-3.5 text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/25"
+            >
+              Sign In
+            </button>
           </div>
         </div>
-      </footer>
+      </section>
 
-      <style jsx>{`
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in-up {
-          animation: fade-in-up 0.8s ease-out;
-        }
-      `}</style>
+      {/* FOOTER */}
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-green-100 bg-[#f0faf5] px-4 py-8 sm:px-6 lg:px-10">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-linear-to-br from-[#1a6b4a] to-[#2da870] text-sm">
+            <img src={logo1} alt="Logo" className="h-6 w-6" />
+          </div>
+          <span className="text-sm font-medium text-gray-900">SGAMS</span>
+        </div>
+        <p className="text-sm text-gray-400">
+          Student & Group Assignment Management System
+        </p>
+      </footer>
     </div>
   );
 }
-
-export default Home;

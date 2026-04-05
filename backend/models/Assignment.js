@@ -1,30 +1,42 @@
-// const jwt = require("jsonwebtoken");
-
-// module.exports = (req, res, next) => {
-//   const token = req.headers.authorization;
-
-//   if (!token) return res.status(401).json({ msg: "No token" });
-
-//   try {
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     req.user = decoded;
-//     next();
-//   } catch {
-//     res.status(401).json({ msg: "Invalid token" });
-//   }
-// };
-
 const mongoose = require("mongoose");
 
 const assignmentSchema = new mongoose.Schema(
   {
-    title: String,
-    description: String,
-    dueDate: Date,
-    oneDriveLink: String,
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    deadline: {
+      type: Date,
+      required: true,
+    },
+    submissionType: {
+      type: String,
+      enum: ["individual", "group"],
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+      required: true,
+    },
+    oneDriveLink: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
   },
   { timestamps: true }

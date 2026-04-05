@@ -1,282 +1,262 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../utils/api";
+import logo1 from "../assets/logo1.png";
 
 function Auth() {
-  const [mode, setMode] = useState("student"); // student | admin | register
+  const navigate = useNavigate();
+  const [authMode, setAuthMode] = useState("login");
+  const [role, setRole] = useState("student");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState({ text: "", type: "" });
 
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validatePassword = (pass) => pass.length >= 6;
+  const validateEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
-  const getErrors = () => {
-    const newErrors = {};
-    if (!email.trim()) newErrors.email = "Email is required";
-    else if (!validateEmail(email)) newErrors.email = "Enter valid email";
-    
-    if (!password) newErrors.password = "Password is required";
-    else if (!validatePassword(password)) newErrors.password = "Password must be 6+ characters";
-    
-    if (mode === "register" && !name.trim()) newErrors.name = "Name is required";
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const resetForm = () => {
+    setName(""); setEmail(""); setPassword("");
+    setErrors({}); setMessage({ text: "", type: "" });
   };
 
-  const showToast = (message, type = "success") => {
-    const toast = document.createElement("div");
-    toast.className = `fixed top-4 right-4 z-50 p-4 rounded-2xl shadow-2xl text-white transform translate-x-full transition-all duration-300 ${
-      type === "error" ? "bg-red-500" : "bg-green-500"
-    }`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.classList.remove("translate-x-full");
-      toast.classList.add("translate-x-0");
-    }, 100);
-    
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
+  const validateForm = () => {
+    const e = {};
+    if (authMode === "register" && !name.trim()) e.name = "Name is required";
+    if (!email.trim()) e.email = "Email is required";
+    else if (!validateEmail(email)) e.email = "Invalid email format";
+    if (!password) e.password = "Password is required";
+    else if (password.length < 6) e.password = "Minimum 6 characters";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async () => {
-    if (!getErrors()) return;
-
+    if (!validateForm()) return;
     setLoading(true);
+    setMessage({ text: "", type: "" });
     try {
-      const isLogin = mode !== "register";
-      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
-      const body = isLogin 
-        ? { email, password } 
-        : { name, email, password };
+      const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
+      const body = authMode === "login"
+        ? { email, password }
+        : { name, email, password, role };
 
-      const { res, data } = await apiFetch(endpoint, {
+      const res = await apiFetch(endpoint, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
-      if (!res.ok) {
-        showToast(data.msg, "error");
+      if (!res.success) {
+        setMessage({ text: res.message || res.error || "Something went wrong", type: "error" });
         return;
       }
 
-      if (isLogin) {
-        // Role check
-        if (mode === "admin" && data.user.role !== "admin") {
-          showToast("Admin access required", "error");
-          return;
-        }
-        if (mode === "student" && data.user.role !== "student") {
-          showToast("Student access required", "error");
-          return;
-        }
-
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        showToast("Login successful!");
-        
-        // Redirect
-        setTimeout(() => {
-          window.location.href = data.user.role === "admin" ? "/admin" : "/student";
-        }, 1000);
-      } else {
-        showToast("Student Registered Successfully!");
-        setMode("student");
-        setName("");
-        setEmail("");
-        setPassword("");
+      if (authMode === "register") {
+        setMessage({ text: "Account created successfully. Please log in.", type: "success" });
+        setAuthMode("login");
+        resetForm();
+        return;
       }
-    } catch (err) {
-      showToast("Network error. Please try again.", "error");
+
+      const { token, user } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      setMessage({ text: "Login successful", type: "success" });
+      setTimeout(() => navigate(user.role === "professor" ? "/professor" : "/student"), 500);
+    } catch {
+      setMessage({ text: "Server error. Please try again.", type: "error" });
     } finally {
       setLoading(false);
     }
   };
 
-  const TabButton = ({ active, onClick, children, icon }) => (
-    <button
-      onClick={onClick}
-      className={`flex-1 px-6 py-3 rounded-xl transition-all duration-150 flex items-center space-x-2 font-medium ${
-        active
-          ? "bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25"
-          : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 bg-white/50"
-      }`}
-    >
-      <span>{icon}</span>
-      <span>{children}</span>
-    </button>
-  );
+  const inputClass = (hasError) =>
+    `w-full rounded-xl border px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 bg-white outline-none transition focus:ring-2 ${
+      hasError
+        ? "border-red-400 focus:ring-red-100"
+        : "border-green-200 focus:border-green-500 focus:ring-green-100"
+    }`;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-linear-to-r from-blue-300/20 to-purple-300/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-linear-to-r from-indigo-300/20 to-pink-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div className="min-h-screen flex">
+      {/* Left panel — green gradient */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-linear-to-br from-[#1a6b4a] via-[#1e8a5e] to-[#3dd68c] px-12 relative overflow-hidden">
+        {/* Decorative circles */}
+        <div className="pointer-events-none absolute -top-20 -left-20 h-64 w-64 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute bottom-10 right-40px h-80 w-80 rounded-full bg-white/5" />
+
+        <div className="relative z-10 text-center text-white">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-3xl backdrop-blur-sm">
+            <img src={logo1} alt="Logo" className="h-6 w-6" />
+          </div>
+          <h1 className="mb-3 text-4xl font-medium tracking-tight">SGAMS</h1>
+          <p className="mb-8 text-lg font-medium text-white/80">
+            Student & Group Assignment<br />Management System
+          </p>
+
+          <div className="flex flex-col gap-4 text-left">
+            {[
+              { icon: "📋", text: "Manage assignments with ease" },
+              { icon: "👥", text: "Collaborate in groups seamlessly" },
+              { icon: "📊", text: "Track progress in real-time" },
+              { icon: "🔐", text: "Secure role-based access" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 backdrop-blur-sm">
+                <span className="text-xl">{item.icon}</span>
+                <span className="text-sm font-medium text-white/90">{item.text}</span>
+              </div>
+            ))}
+          </div>
         </div>
+      </div>
 
-        {/* Main Card */}
-        <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-8 transform hover:scale-[1.02] transition-all duration-500">
-          
-          {/* Logo/Title */}
-          <div className="text-center mb-8">
-            
-            <h1 className="text-3xl bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              Welcome Back
-            </h1>
-            <p className="text-gray-600 mt-2">Sign in to your account</p>
+      {/* Right panel — form */}
+      <div className="flex w-full items-center justify-center bg-[#f0faf5] px-4 py-12 lg:w-1/2">
+        <div className="w-full max-w-md">
+          {/* Mobile logo */}
+          <div className="mb-8 text-center lg:hidden">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-br from-[#1a6b4a] to-[#2da870] text-2xl shadow-md">
+              <img src={logo1} alt="Logo" className="h-6 w-6" />
+            </div>
+            <h1 className="text-2xl font-medium text-gray-900">SGAMS</h1>
           </div>
 
-          {/* Mode Tabs */}
-          <div className="grid grid-cols-2 rounded-full gap-2 mb-8 bg-white/50 p-1 shadow-inner">
-            <TabButton 
-              active={mode === "student"}
-              onClick={() => setMode("student")}
-              
-            >
-              Student
-            </TabButton>
-            <TabButton 
-              active={mode === "admin"}
-              onClick={() => setMode("admin")}
-             
-            >
-              Admin
-            </TabButton>
-          </div>
+          <div className="rounded-3xl border border-green-100 bg-white p-8 shadow-sm">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {authMode === "login" ? "Welcome back" : "Create account"}
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                {authMode === "login"
+                  ? "Sign in to your SGAMS account"
+                  : "Join SGAMS to get started"}
+              </p>
+            </div>
 
-          {/* Form */}
-          <div className="space-y-6">
-            {mode === "register" && (
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="text-gray-500">👤</span>
-                </div>
-                <input
-                  className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all bg-white/50 backdrop-blur-sm ${
-                    errors.name ? 'border-red-300 bg-red-50/50' : 'border-gray-200 hover:border-gray-300 focus:border-blue-500'
+            {/* Mode toggle */}
+            <div className="mb-5 flex rounded-xl bg-green-50 p-1 border border-green-100">
+              {["login", "register"].map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => { setAuthMode(mode); resetForm(); }}
+                  className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold capitalize transition ${
+                    authMode === mode
+                      ? "bg-linear-to-r from-[#1a6b4a] to-[#2da870] text-white shadow-sm"
+                      : "text-gray-500 hover:text-green-700"
                   }`}
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    if (errors.name) delete errors.name;
-                  }}
-                />
-                {errors.name && <p className="text-sm text-red-600 mt-1 ml-1">{errors.name}</p>}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+
+            {/* Role selector */}
+            {authMode === "register" && (
+              <div className="mb-5 flex gap-3">
+                {["student", "professor"].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRole(r)}
+                    className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold capitalize transition ${
+                      role === r
+                        ? "border-green-500 bg-green-50 text-green-700"
+                        : "border-gray-200 bg-white text-gray-500 hover:border-green-200 hover:bg-green-50/50"
+                    }`}
+                  >
+                    {r === "student" ? " " : " "}{r}
+                  </button>
+                ))}
               </div>
             )}
 
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <span className="text-gray-500">📧</span>
+            {/* Message */}
+            {message.text && (
+              <div className={`mb-4 rounded-xl border px-4 py-3 text-sm ${
+                message.type === "error"
+                  ? "border-red-200 bg-red-50 text-red-700"
+                  : "border-green-200 bg-green-50 text-green-700"
+              }`}>
+                {message.text}
               </div>
-              <input
-                className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all bg-white/50 backdrop-blur-sm ${
-                  errors.email ? 'border-red-300 bg-red-50/50' : 'border-gray-200 hover:border-gray-300 focus:border-blue-500'
-                }`}
-                type="email"
-                placeholder="Email Address"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (errors.email) delete errors.email;
-                }}
-              />
-              {errors.email && <p className="text-sm text-red-600 mt-1 ml-1">{errors.email}</p>}
-            </div>
+            )}
 
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <span className="text-gray-500">🔒</span>
+            <div className="space-y-4">
+              {authMode === "register" && (
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">Full Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={name}
+                    onChange={(e) => { setName(e.target.value); setErrors({ ...errors, name: "" }); }}
+                    className={inputClass(errors.name)}
+                  />
+                  {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
+                </div>
+              )}
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setErrors({ ...errors, email: "" }); }}
+                  className={inputClass(errors.email)}
+                />
+                {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
               </div>
-              <input
-                className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all bg-white/50 backdrop-blur-sm ${
-                  errors.password ? 'border-red-300 bg-red-50/50' : 'border-gray-200 hover:border-gray-300 focus:border-blue-500'
-                }`}
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errors.password) delete errors.password;
-                }}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-4 flex items-center"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                <span className="text-gray-500">{showPassword ? "hide" : "show"}</span>
-              </button>
-              {errors.password && <p className="text-sm text-red-600 mt-1 ml-1">{errors.password}</p>}
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value); setErrors({ ...errors, password: "" }); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                    className={`${inputClass(errors.password)} pr-16`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-green-600 hover:text-green-800"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+                {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
+              </div>
             </div>
 
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-linear-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-2"
+              className="mt-6 w-full rounded-xl bg-linear-to-r from-[#1a6b4a] to-[#2da870] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <>
-                  <span>{mode === "register" ? "Register" : "Login"}</span>
-                </>
-              )}
+              {loading
+                ? authMode === "login" ? "Signing in..." : "Creating account..."
+                : authMode === "login" ? "Sign In" : "Create Account"}
             </button>
-          </div>
 
-          {/* Register Toggle (for login modes) */}
-          {mode !== "register" && (
-            <p className="text-center mt-6 text-sm text-gray-600">
-              {mode === "student" ? "New student?" : "Admin account?"}{' '}
+            <p className="mt-5 text-center text-sm text-gray-500">
+              {authMode === "login" ? "Don't have an account? " : "Already have an account? "}
               <button
-                onClick={() => {
-                  setMode(mode === "student" ? "register" : "admin");
-                  setEmail("");
-                  setPassword("");
-                }}
-                className="font-semibold rounded-full text-blue-600 hover:text-blue-700 transition-colors"
+                type="button"
+                onClick={() => { setAuthMode(authMode === "login" ? "register" : "login"); resetForm(); }}
+                className="font-semibold text-green-600 hover:text-green-800"
               >
-                {mode === "student" ? "Register here" : "Admin Login"}
+                {authMode === "login" ? "Register" : "Login"}
               </button>
             </p>
-          )}
-
-          {/* Divider & Alternative */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white/70 text-gray-500 backdrop-blur-sm">or</span>
-            </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <button className="py-3 px-4 border-2 border-gray-300 rounded-2xl hover:shadow-md hover:border-gray-400 transition-all bg-white/50 backdrop-blur-sm flex items-center justify-center space-x-2 text-sm font-medium">
-            <span className="text-sky-400">Google</span>
-              
-            </button>
-            <button className="py-3 px-4 border-2 border-gray-300 rounded-2xl hover:shadow-md hover:border-gray-400 transition-all bg-white/50 backdrop-blur-sm flex items-center justify-center space-x-2 text-sm font-medium">
-              <span className="text-blue-600">F<span className="text-blue-400">acebook</span></span>
-            </button>
-          </div>
-
-          <p className="text-xs text-gray-500 text-center mt-6">
-            By continuing, you agree to our Terms of Service and Privacy Policy.
-          </p>
         </div>
       </div>
     </div>
